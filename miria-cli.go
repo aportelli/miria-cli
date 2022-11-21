@@ -1,32 +1,33 @@
+/*
+ * miria-cli.go, part of miria-cli (https://github.com/aportelli/miria-cli)
+ * Copyright (C) 2022 Antonin Portelli
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
 	"os"
 	"path"
 	"syscall"
 
+	"github.com/aportelli/miria-cli/client"
+	glob "github.com/aportelli/miria-cli/global"
 	"golang.org/x/term"
 )
-
-type AuthRequest struct {
-	Db        string `json:"dbName"`
-	Name      string `json:"name"`
-	Password  string `json:"password"`
-	SuperUser bool   `json:"superUser"`
-}
-
-type AuthToken struct {
-	Db      string `json:"dbName"`
-	Expire  int    `json:"expire"`
-	Refresh string `json:"refresh"`
-	Access  string `json:"access"`
-}
 
 func main() {
 	if len(os.Args[1:]) != 1 {
@@ -35,96 +36,53 @@ func main() {
 	}
 	host := os.Args[1]
 
-	var auth AuthToken
+	c := client.NewClient(host)
 
-	cacheDir, _ := os.UserCacheDir()
-	appCacheDir := cacheDir + "/miria-cli"
-	authPath := appCacheDir + "/auth.json"
-	_, error := os.Open(authPath)
-	if error == nil {
-		authj, _ := os.ReadFile(authPath)
-		json.Unmarshal(authj, &auth)
-		fmt.Println("Token exists", auth.Access)
-	} else {
-		var authr AuthRequest
-
+	var username string
+	err := c.CheckAuthentication()
+	if err != nil {
 		fmt.Print("Enter username: ")
-		fmt.Scanln(&authr.Name)
+		fmt.Scanln(&username)
 		fmt.Print("Enter password: ")
 		bytepw, _ := term.ReadPassword(int(syscall.Stdin))
-		authr.Password = string(bytepw)
-		authr.Db = "ADA"
-		authr.SuperUser = false
-		authrj, _ := json.Marshal(authr)
-		response, err := http.Post("http://"+host+"/restapi/auth/token/", "application/json", bytes.NewBuffer(authrj))
+		fmt.Println("")
+		err = c.Authenticate(username, string(bytepw))
 		if err != nil {
-			fmt.Print(err.Error())
+			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		defer response.Body.Close()
-		jbuf, _ := io.ReadAll(response.Body)
-		json.Unmarshal(jbuf, &auth)
-		fileContent, _ := json.MarshalIndent(auth, "", "  ")
-		os.MkdirAll(appCacheDir, 0700)
-		os.WriteFile(authPath, fileContent, 0600)
-		fmt.Println("Token created", auth.Access)
 	}
-
-	var bearer = "Bearer " + auth.Access
-
-	request, err := http.NewRequest("GET", "http://"+host+"/restapi/datamanagement/repositories/", nil)
+	fmt.Println("Authenticated!")
+	response, err := c.Get("/datamanagement/repositories/", true)
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	request.Header.Add("Authorization", bearer)
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
-	}
-	defer response.Body.Close()
-	responseData, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(responseData))
+	glob.PrettyPrintResponse(response)
 
 	search := []byte(`{
-		"rootObjectPath": "archive@dp207",
-  	"resultType": "INST",
-		"criteria": {
-			"condition": "AND",
-			"rules": [
-				{
-					"type": "FILE_NAME",
-					"value": "",
-					"value2": null,
-					"operator": "contains"
-				}
-			]
+			"rootObjectPath": "archive@dp207",
+	  	"resultType": "INST",
+			"pageSize": 1000,
+			"criteria": {
+				"condition": "AND",
+				"rules": [
+					{
+						"type": "FILE_NAME",
+						"value": "",
+						"value2": null,
+						"operator": "contains"
+					}
+				]
+			}
 		}
-	}
-`)
-
-	request, err = http.NewRequest("POST", "http://"+host+"/restapi/files/advanced-search/", bytes.NewBuffer(search))
-	// request, err = http.NewRequest("POST", "http://pie.dev/post", bytes.NewBuffer(search))
+	`)
+	var searchMap map[string]any
+	json.Unmarshal(search, &searchMap)
+	response, err = c.Post("/files/advanced-search/", searchMap, true)
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	request.Header.Add("Authorization", bearer)
-	request.Header.Set("Content-Type", "application/json")
-	response, err = http.DefaultClient.Do(request)
-	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
-	}
-	defer response.Body.Close()
-
-	responseData, err = io.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(responseData))
+	glob.PrettyPrintResponse(response)
 }
