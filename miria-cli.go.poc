@@ -27,9 +27,12 @@ import (
 	"github.com/aportelli/miria-cli/client"
 	glob "github.com/aportelli/miria-cli/global"
 	"golang.org/x/term"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func main() {
+	cobra.Command
 	if len(os.Args[1:]) != 1 {
 		fmt.Fprintln(os.Stderr, "usage:", path.Base(os.Args[0]), "<Miria host>")
 		os.Exit(1)
