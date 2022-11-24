@@ -33,6 +33,7 @@ var configCmd = &cobra.Command{
 var configListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List possible options",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, opt := range options {
 			fmt.Println(opt)
@@ -43,19 +44,23 @@ var configListCmd = &cobra.Command{
 var configFileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "Get path of current config file",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(viper.ConfigFileUsed())
 	},
 }
 
 var configSetCmd = &cobra.Command{
-	Use:   "set",
+	Use:   "set <option> <value>",
 	Short: "Set option",
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
+		inputOpt := args[0]
+		val := args[1]
+
 		for _, opt := range options {
-			if opt == args[0] {
-				viper.Set(opt, args[1])
+			if opt == inputOpt {
+				viper.Set(opt, val)
 				err := viper.WriteConfig()
 				if err != nil {
 					log.Fatalf("error: %s\nerror: cannot write config file", err.Error())
@@ -63,27 +68,29 @@ var configSetCmd = &cobra.Command{
 				return
 			}
 		}
-		log.Fatal("error: option '" + args[0] + "' does not exist, use `miria config list` to see all possible options")
+		log.Fatal("error: option '" + inputOpt + "' does not exist, use `miria config list` to see all possible options")
 	},
 }
 
 var configGetCmd = &cobra.Command{
-	Use:   "get",
+	Use:   "get <option>",
 	Short: "Get option",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		inputOpt := args[0]
+
 		err := viper.ReadInConfig()
 		if err != nil {
 			log.Fatalf("error: %s\nerror: cannot read config file", err.Error())
 		}
 		for _, opt := range options {
-			if opt == args[0] {
+			if opt == inputOpt {
 				val := viper.Get(opt)
 				fmt.Println(val)
 				return
 			}
 		}
-		log.Fatal("error: option '" + args[0] + "' does not exist, use `miria config list` to see all possible options")
+		log.Fatal("error: option '" + inputOpt + "' does not exist, use `miria config list` to see all possible options")
 	},
 }
 

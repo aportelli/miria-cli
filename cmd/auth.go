@@ -32,6 +32,7 @@ var authResetCmd = &cobra.Command{
 	Use:   "reset",
 	Short: "Reset authentication",
 	Long:  `Reset authentication token, you will be asked your user name and password.`,
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		authPath, err := miria.Client.AuthenticationCache()
 		if err != nil {
@@ -54,6 +55,7 @@ var authCheckCmd = &cobra.Command{
 	Short: "Check authentication",
 	Long: `Check authentication token and try to refresh it if necessary, 
 exit with status 1 in case of failure`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := miria.Client.CheckAuthentication()
 		if err != nil {

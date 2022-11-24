@@ -30,14 +30,14 @@ Example:
   miria find archive@project:/dir -name '*.txt'`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("find called", findPath)
+		fmt.Println("find called", findOpt.Path)
 	},
 }
 
-var findPath string
+var findOpt = struct{ Path string }{""}
 
 func init() {
 	rootCmd.AddCommand(findCmd)
-	findCmd.Flags().StringVarP(&findPath, "name", "n", "", "search pattern")
+	findCmd.Flags().StringVarP(&findOpt.Path, "name", "n", "", "search pattern")
 	findCmd.MarkFlagRequired("name")
 }
