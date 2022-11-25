@@ -18,8 +18,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -62,13 +62,11 @@ var configSetCmd = &cobra.Command{
 			if opt == inputOpt {
 				viper.Set(opt, val)
 				err := viper.WriteConfig()
-				if err != nil {
-					log.Fatalf("error: %s\nerror: cannot write config file", err.Error())
-				}
+				log.ErrorCheck(err, "cannot write config file")
 				return
 			}
 		}
-		log.Fatal("error: option '" + inputOpt + "' does not exist, use `miria config list` to see all possible options")
+		log.Err.Fatalf("option '%s' does not exist, use `miria config list` to see all possible options", inputOpt)
 	},
 }
 
@@ -80,9 +78,7 @@ var configGetCmd = &cobra.Command{
 		inputOpt := args[0]
 
 		err := viper.ReadInConfig()
-		if err != nil {
-			log.Fatalf("error: %s\nerror: cannot read config file", err.Error())
-		}
+		log.ErrorCheck(err, "cannot read config file")
 		for _, opt := range options {
 			if opt == inputOpt {
 				val := viper.Get(opt)
@@ -90,7 +86,7 @@ var configGetCmd = &cobra.Command{
 				return
 			}
 		}
-		log.Fatal("error: option '" + inputOpt + "' does not exist, use `miria config list` to see all possible options")
+		log.Err.Fatalf("option '%s' does not exist, use `miria config list` to see all possible options", inputOpt)
 	},
 }
 

@@ -25,6 +25,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+
+	"github.com/aportelli/miria-cli/log"
 )
 
 type restClient struct {
@@ -63,6 +65,19 @@ func (c *restClient) executeRequest(request *http.Request, authenticate bool) (m
 		}
 		request.Header.Add("Authorization", "Bearer "+c.auth.Access)
 	}
+	if log.Level >= 2 {
+		log.Dbg.Println("* Request headers")
+		for k, v := range request.Header {
+			buf := k + ": "
+			for i, val := range v {
+				buf += val
+				if i < len(v)-1 {
+					buf += ", "
+				}
+			}
+			log.Dbg.Println(buf)
+		}
+	}
 
 	// execute request
 	var raw map[string]any
@@ -97,6 +112,11 @@ func (c *restClient) Post(path string, body any, authenticate bool) (map[string]
 	if err != nil {
 		return nil, err
 	}
+	log.Inf.Printf("POST %s", c.apiUrl+path)
+	if log.Level >= 2 {
+		jbufPretty, _ := json.MarshalIndent(body, "", "  ")
+		log.Dbg.Printf("* Request data\n%s", string(jbufPretty))
+	}
 
 	return c.executeRequest(request, authenticate)
 }
@@ -107,6 +127,7 @@ func (c *restClient) Get(path string, authenticate bool) (map[string]any, error)
 	if err != nil {
 		return nil, err
 	}
+	log.Inf.Printf("GET %s", c.apiUrl+path)
 
 	return c.executeRequest(request, authenticate)
 }

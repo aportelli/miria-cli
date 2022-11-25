@@ -17,9 +17,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"log"
 	"os"
 
+	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 )
 
@@ -35,18 +35,12 @@ var authResetCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		authPath, err := miria.Client.AuthenticationCache()
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
+		log.ErrorCheck(err, "")
 		err = os.RemoveAll(authPath)
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
+		log.ErrorCheck(err, "")
 		err = miria.AuthenticateInteractive()
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
-		log.Println("Authentication token successfully reset")
+		log.ErrorCheck(err, "")
+		log.Msg.Println("Authentication token successfully reset")
 	},
 }
 
@@ -58,10 +52,8 @@ exit with status 1 in case of failure`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := miria.Client.CheckAuthentication()
-		if err != nil {
-			log.Fatalf("error: %s\nerror: authentication check failed", err.Error())
-		}
-		log.Println("Authentication token valid")
+		log.ErrorCheck(err, "authentication check failed")
+		log.Msg.Println("Authentication token valid")
 	},
 }
 

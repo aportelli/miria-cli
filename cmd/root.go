@@ -17,11 +17,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 
 	"github.com/aportelli/miria-cli/client"
+	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -45,19 +44,16 @@ func Execute() {
 }
 
 func init() {
-	log.SetFlags(0)
+	rootCmd.PersistentFlags().UintVarP(&log.Level, "verbosity", "v", 0,
+		"verbosity level (0: default, 1: info, 2: debug)")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		panic(fmt.Errorf("cannot find user config directory\nerror: %w", err))
-	}
+	log.ErrorCheck(err, "cannot find user config directory")
 	viper.AddConfigPath(userConfigDir + "/miria")
 	viper.SafeWriteConfig()
 	err = viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("cannot load config file\nerror: %w", err))
-	}
+	log.ErrorCheck(err, "cannot read user config")
 	host := viper.Get("host")
 	if host != nil {
 		miria = client.NewMiria(host.(string))

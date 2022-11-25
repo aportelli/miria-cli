@@ -18,8 +18,8 @@ package cmd
 
 import (
 	"encoding/json"
-	"log"
 
+	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 )
 
@@ -37,14 +37,10 @@ var restGetCmd = &cobra.Command{
 		path := args[0]
 
 		response, err := miria.Client.Get(path, !restOpt.NoAuth)
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
+		log.ErrorCheck(err, "")
 		jbuf, err := json.MarshalIndent(response, "", "  ")
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
-		log.Println(string(jbuf))
+		log.ErrorCheck(err, "")
+		log.Msg.Println(string(jbuf))
 	},
 }
 
@@ -59,18 +55,12 @@ var restPostCmd = &cobra.Command{
 		bodyJson := args[1]
 
 		err := json.Unmarshal([](byte)(bodyJson), &body)
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
+		log.ErrorCheck(err, "")
 		response, err := miria.Client.Post(path, body, !restOpt.NoAuth)
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
+		log.ErrorCheck(err, "")
 		jbuf, err := json.MarshalIndent(response, "", "  ")
-		if err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
-		log.Println(string(jbuf))
+		log.ErrorCheck(err, "")
+		log.Msg.Println(string(jbuf))
 	},
 }
 
