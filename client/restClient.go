@@ -59,7 +59,12 @@ func (c *restClient) executeRequest(request *http.Request, authenticate bool) (m
 	// complete request
 	request.Header.Set("Content-Type", "application/json")
 	if authenticate {
+		logCopy := log.Level
+		if logCopy >= 1 {
+			log.Level = 1
+		}
 		err := c.CheckAuthentication()
+		log.Level = logCopy
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +132,7 @@ func (c *restClient) Get(path string, authenticate bool) (map[string]any, error)
 	if err != nil {
 		return nil, err
 	}
-	log.Inf.Printf("GET %s", c.apiUrl+path)
+	log.Inf.Printf(" GET %s", c.apiUrl+path)
 
 	return c.executeRequest(request, authenticate)
 }
