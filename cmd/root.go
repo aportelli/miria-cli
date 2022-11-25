@@ -44,7 +44,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().UintVarP(&log.Level, "verbosity", "v", 0,
+	rootCmd.PersistentFlags().IntVarP(&log.Level, "verbosity", "v", 0,
 		"verbosity level (0: default, 1: info, 2: debug)")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")

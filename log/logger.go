@@ -23,12 +23,12 @@ import (
 )
 
 type Logger struct {
-	Level     uint
+	Level     int
 	Color     *color.Color
 	StdLogger *log.Logger
 }
 
-var Level uint = 0
+var Level int = 0
 
 func (l Logger) printFn(fn func()) {
 	if Level >= l.Level {
