@@ -28,7 +28,7 @@ var Inf = Logger{
 
 var Msg = Logger{
 	Level:     0,
-	Color:     color.New(color.Bold),
+	Color:     color.New(),
 	StdLogger: log.New(os.Stdout, "", 0),
 }
 
