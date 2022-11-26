@@ -1,3 +1,4 @@
 /miria
 /miria-cli.code-workspace
 /.vscode
+*.prof

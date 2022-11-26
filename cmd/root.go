@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"os"
+	"runtime/pprof"
 
 	"github.com/aportelli/miria-cli/client"
 	"github.com/aportelli/miria-cli/log"
@@ -32,6 +33,21 @@ var rootCmd = &cobra.Command{
 	Use:   "miria",
 	Short: "CLI for Atempo Miria",
 	Long:  `Command-line interface tool to interact with an Atempo Miria tape storage solution.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if rootOpt.Profile != "" {
+			log.Inf.Printf("Starting profiling (output file '%s')", rootOpt.Profile)
+			f, err := os.Create(rootOpt.Profile)
+			log.ErrorCheck(err, "cannot create profile file '"+rootOpt.Profile+"'")
+			err = pprof.StartCPUProfile(f)
+			log.ErrorCheck(err, "cannot start profiling")
+		}
+	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		if rootOpt.Profile != "" {
+			log.Inf.Printf("Stopping profiling (output file '%s')", rootOpt.Profile)
+			pprof.StopCPUProfile()
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -43,9 +59,12 @@ func Execute() {
 	}
 }
 
+var rootOpt = struct{ Profile string }{""}
+
 func init() {
 	rootCmd.PersistentFlags().IntVarP(&log.Level, "verbosity", "v", 0,
 		"verbosity level (0: default, 1: info, 2: debug)")
+	rootCmd.PersistentFlags().StringVar(&rootOpt.Profile, "profile", "", "save pprof profile")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	userConfigDir, err := os.UserConfigDir()
