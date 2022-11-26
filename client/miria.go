@@ -23,6 +23,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/aportelli/miria-cli/log"
 	"golang.org/x/term"
 )
 
@@ -121,11 +122,15 @@ func (m *Miria) Find(path string, pattern string) error {
 	}
 
 	// execute request
+	var searchResp SearchResponse
 	resp, err := m.Client.Post("/files/advanced-search/", req, true)
 	if err != nil {
 		return err
 	}
-	PrettyPrintResponse(resp)
+	JsonMapToStruct(&searchResp, resp)
+	for _, r := range searchResp.Results {
+		log.Msg.Println(r.ObjectPath)
+	}
 	nextPage := resp["nextPage"]
 	for nextPage != nil {
 		nextPageEnc := url.QueryEscape(nextPage.(string))
@@ -133,7 +138,10 @@ func (m *Miria) Find(path string, pattern string) error {
 		if err != nil {
 			return err
 		}
-		PrettyPrintResponse(resp)
+		JsonMapToStruct(&searchResp, resp)
+		for _, r := range searchResp.Results {
+			log.Msg.Println(r.ObjectPath)
+		}
 		nextPage = resp["nextPage"]
 	}
 
