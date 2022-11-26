@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -93,11 +92,8 @@ func (c *restClient) executeRequest(request *http.Request, authenticate bool) (m
 		return nil, err
 	}
 	defer response.Body.Close()
-	jbuf, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(jbuf, &raw)
+	dec := json.NewDecoder(response.Body)
+	err = dec.Decode(&raw)
 	if err != nil {
 		return nil, err
 	}
