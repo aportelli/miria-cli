@@ -59,12 +59,9 @@ func (c *restClient) executeRequest(request *http.Request, authenticate bool) (m
 	// complete request
 	request.Header.Set("Content-Type", "application/json")
 	if authenticate {
-		logCopy := log.Level
-		if logCopy >= 1 {
-			log.Level = 1
-		}
+		levelCopy := log.AtMostLevel(0)
 		err := c.CheckAuthentication()
-		log.Level = logCopy
+		log.Level = levelCopy
 		if err != nil {
 			return nil, err
 		}
@@ -74,10 +71,14 @@ func (c *restClient) executeRequest(request *http.Request, authenticate bool) (m
 		log.Dbg.Println("* Request headers")
 		for k, v := range request.Header {
 			buf := k + ": "
-			for i, val := range v {
-				buf += val
-				if i < len(v)-1 {
-					buf += ", "
+			if k == "Authorization" {
+				buf += "Bearer <redacted>"
+			} else {
+				for i, val := range v {
+					buf += val
+					if i < len(v)-1 {
+						buf += ", "
+					}
 				}
 			}
 			log.Dbg.Println(buf)
@@ -178,7 +179,10 @@ func (c *restClient) Authenticate(username string, password string) error {
 	request.SuperUser = false
 	request.Name = username
 	request.Password = password
+	log.Dbg.Println("warning: debug output deactivated during authentication")
+	levelCopy := log.AtMostLevel(1)
 	auth, err := c.Post("/auth/token/", request, false)
+	log.Level = levelCopy
 	if err != nil {
 		return err
 	}

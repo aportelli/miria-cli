@@ -30,6 +30,14 @@ type Logger struct {
 
 var Level int = 0
 
+func AtMostLevel(maxLevel int) int {
+	logCopy := Level
+	if logCopy >= maxLevel {
+		Level = maxLevel
+	}
+	return logCopy
+}
+
 func (l Logger) printFn(fn func()) {
 	if Level >= l.Level {
 		l.Color.Set()
