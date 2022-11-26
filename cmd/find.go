@@ -17,6 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"github.com/aportelli/miria-cli/client"
+	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,13 +31,42 @@ Example:
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		pattern := args[0]
-		miria.Find(pattern, findOpt.Path)
+		cout := make(chan []client.SearchResult)
+		cerr := make(chan error)
+		go miria.Find(pattern, findOpt.Path, cout, cerr)
+	out:
+		for {
+			select {
+			case err := <-cerr:
+				log.ErrorCheck(err, "")
+				return
+			case buf := <-cout:
+				if buf == nil {
+					break out
+				} else {
+					if findOpt.List {
+						for _, r := range buf {
+							log.Msg.Printf("%6s %12d %s", r.ObjectType, r.ObjectSize, r.ObjectPath)
+						}
+					} else {
+						for _, r := range buf {
+							log.Msg.Println(r.ObjectPath)
+						}
+					}
+				}
+			}
+		}
 	},
 }
 
-var findOpt = struct{ Path string }{""}
+var findOpt = struct {
+	Path string
+	List bool
+}{"", false}
 
 func init() {
 	rootCmd.AddCommand(findCmd)
 	findCmd.Flags().StringVarP(&findOpt.Path, "name", "n", "", "search pattern")
+	findCmd.Flags().BoolVarP(&findOpt.List, "list", "l", false, "search pattern")
+	findCmd.Flags().Lookup("list").NoOptDefVal = "true"
 }

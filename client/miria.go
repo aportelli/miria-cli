@@ -23,7 +23,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/aportelli/miria-cli/log"
+	"github.com/mitchellh/mapstructure"
 	"golang.org/x/term"
 )
 
@@ -61,13 +61,13 @@ func (m *Miria) AuthenticateInteractive() error {
 	return nil
 }
 
-func (m *Miria) Find(path string, pattern string) error {
+func (m *Miria) Find(path string, pattern string, cout chan []SearchResult, cerr chan error) {
 	// form search request from pattern
 	var req FindInstanceRequest
 
 	req.RootObjectPath = path
 	req.ResultType = "INST"
-	req.PageSize = 1000
+	req.PageSize = 3000
 	req.Criteria.Condition = "AND"
 	split := strings.Split(pattern, "*")
 	if pattern == "*" || pattern == "" {
@@ -125,25 +125,22 @@ func (m *Miria) Find(path string, pattern string) error {
 	var searchResp SearchResponse
 	resp, err := m.Client.Post("/files/advanced-search/", req, true)
 	if err != nil {
-		return err
+		cerr <- err
+		return
 	}
-	JsonMapToStruct(&searchResp, resp)
-	for _, r := range searchResp.Results {
-		log.Msg.Println(r.ObjectPath)
-	}
+	mapstructure.Decode(resp, &searchResp)
+	cout <- searchResp.Results
 	nextPage := resp["nextPage"]
 	for nextPage != nil {
 		nextPageEnc := url.QueryEscape(nextPage.(string))
 		resp, err := m.Client.Post("/files/advanced-search/?page="+nextPageEnc, req, true)
 		if err != nil {
-			return err
+			cerr <- err
+			return
 		}
-		JsonMapToStruct(&searchResp, resp)
-		for _, r := range searchResp.Results {
-			log.Msg.Println(r.ObjectPath)
-		}
+		mapstructure.Decode(resp, &searchResp)
+		cout <- searchResp.Results
 		nextPage = resp["nextPage"]
 	}
-
-	return nil
+	cout <- nil
 }
