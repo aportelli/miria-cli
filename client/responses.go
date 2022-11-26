@@ -23,3 +23,22 @@ type AuthToken struct {
 	Refresh string `json:"refresh"`
 	Access  string `json:"access"`
 }
+
+type SearchResponse struct {
+	Next         string         `json:"next"`
+	NextPage     string         `json:"nextPage"`
+	Previous     interface{}    `json:"previous"`
+	PreviousPage interface{}    `json:"previousPage"`
+	Results      []SearchResult `json:"results"`
+}
+
+type SearchResult struct {
+	InstanceBackupDate string `json:"instanceBackupDate"`
+	InstanceID         int    `json:"instanceId"`
+	ObjectID           int    `json:"objectId"`
+	ObjectName         string `json:"objectName"`
+	ObjectPath         string `json:"objectPath"`
+	ObjectSize         uint64 `json:"objectSize"`
+	ObjectType         string `json:"objectType"`
+	RepositoryID       int    `json:"repositoryId"`
+}

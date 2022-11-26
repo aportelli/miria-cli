@@ -17,8 +17,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +28,8 @@ Example:
   miria find archive@project:/dir -name '*.txt'`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("find called", findOpt.Path)
+		pattern := args[0]
+		miria.Find(pattern, findOpt.Path)
 	},
 }
 
@@ -39,5 +38,4 @@ var findOpt = struct{ Path string }{""}
 func init() {
 	rootCmd.AddCommand(findCmd)
 	findCmd.Flags().StringVarP(&findOpt.Path, "name", "n", "", "search pattern")
-	findCmd.MarkFlagRequired("name")
 }

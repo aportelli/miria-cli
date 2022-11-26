@@ -19,6 +19,8 @@ package client
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
 	"syscall"
 
 	"golang.org/x/term"
@@ -37,8 +39,8 @@ func NewMiria(host string) *Miria {
 	return m
 }
 
-func (m *Miria) AuthenticateInteractive() (err error) {
-	err = m.Client.CheckAuthentication()
+func (m *Miria) AuthenticateInteractive() error {
+	err := m.Client.CheckAuthentication()
 	if err != nil {
 		var username string
 
@@ -58,6 +60,82 @@ func (m *Miria) AuthenticateInteractive() (err error) {
 	return nil
 }
 
-func (m *Miria) Find(pattern string) {
+func (m *Miria) Find(path string, pattern string) error {
+	// form search request from pattern
+	var req FindInstanceRequest
 
+	req.RootObjectPath = path
+	req.ResultType = "INST"
+	req.PageSize = 1000
+	req.Criteria.Condition = "AND"
+	split := strings.Split(pattern, "*")
+	if pattern == "*" || pattern == "" {
+		// match everything
+		rule := FindRule{
+			Type:     "FILE_NAME",
+			Value:    "",
+			Value2:   nil,
+			Operator: "contains",
+		}
+		req.Criteria.Rules = append(req.Criteria.Rules, rule)
+	} else if len(split) == 1 {
+		// no wildcard
+		rule := FindRule{
+			Type:     "FILE_NAME",
+			Value:    split[0],
+			Value2:   nil,
+			Operator: "equal",
+		}
+		req.Criteria.Rules = append(req.Criteria.Rules, rule)
+	} else {
+		// first character is not a wildcard
+		if split[0] != "" {
+			rule := FindRule{
+				Type:     "FILE_NAME",
+				Value:    split[0],
+				Value2:   nil,
+				Operator: "starts with",
+			}
+			req.Criteria.Rules = append(req.Criteria.Rules, rule)
+		}
+		// strings between wildcards
+		for _, s := range split[1 : len(split)-1] {
+			rule := FindRule{
+				Type:     "FILE_NAME",
+				Value:    s,
+				Value2:   nil,
+				Operator: "contains",
+			}
+			req.Criteria.Rules = append(req.Criteria.Rules, rule)
+		}
+		// last character is not a wildcard
+		if split[len(split)-1] != "" {
+			rule := FindRule{
+				Type:     "FILE_NAME",
+				Value:    split[len(split)-1],
+				Value2:   nil,
+				Operator: "ends with",
+			}
+			req.Criteria.Rules = append(req.Criteria.Rules, rule)
+		}
+	}
+
+	// execute request
+	resp, err := m.Client.Post("/files/advanced-search/", req, true)
+	if err != nil {
+		return err
+	}
+	PrettyPrintResponse(resp)
+	nextPage := resp["nextPage"]
+	for nextPage != nil {
+		nextPageEnc := url.QueryEscape(nextPage.(string))
+		resp, err := m.Client.Post("/files/advanced-search/?page="+nextPageEnc, req, true)
+		if err != nil {
+			return err
+		}
+		PrettyPrintResponse(resp)
+		nextPage = resp["nextPage"]
+	}
+
+	return nil
 }

@@ -23,3 +23,20 @@ type AuthRequest struct {
 	Password  string `json:"password"`
 	SuperUser bool   `json:"superUser"`
 }
+
+type FindInstanceRequest struct {
+	RootObjectPath string `json:"rootObjectPath"`
+	ResultType     string `json:"resultType"`
+	PageSize       int    `json:"pageSize"`
+	Criteria       struct {
+		Condition string     `json:"condition"`
+		Rules     []FindRule `json:"rules"`
+	} `json:"criteria"`
+}
+
+type FindRule struct {
+	Type     string `json:"type"`
+	Value    string `json:"value"`
+	Value2   any    `json:"value2"`
+	Operator string `json:"operator"`
+}
