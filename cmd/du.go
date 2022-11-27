@@ -27,7 +27,7 @@ import (
 // duCmd represents the du command
 var duCmd = &cobra.Command{
 	Use:   "du <path>",
-	Short: "show total size contained in a given path",
+	Short: "Show total size contained in a given path",
 	Long: `Show total size contained in a given path, mimicking the ` + "`du -s`" + ` Unix command.
 Miria does not have a direct interface to query directory sizes, this command 
 will perform a full scan similar to the ` + "`find`" + ` command, and might take time 

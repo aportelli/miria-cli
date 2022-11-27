@@ -25,8 +25,8 @@ import (
 
 var restCmd = &cobra.Command{
 	Use:   "rest",
-	Short: "REST API request",
-	Long:  `Manual REST API request to Miria server, request are athenticated by default.`,
+	Short: "Manual REST API request",
+	Long:  `Manual REST API request to Miria server, requests are authenticated by default.`,
 }
 
 var restGetCmd = &cobra.Command{
