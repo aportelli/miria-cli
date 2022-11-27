@@ -24,10 +24,11 @@ import (
 
 var findCmd = &cobra.Command{
 	Use:   "find <path>",
-	Short: "Find files in archive",
-	Long: `Find files in the tape archive.
+	Short: "Find files in archive, ",
+	Long: `Find files in the tape archive, mimicking the ` + "`find`" + ` Unix command.
+
 Example:
-  miria find archive@project:/dir -name '*.txt'`,
+  miria find archive@project:/dir --name '*.txt'`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		findOpt.Opt.Path = args[0]
@@ -47,12 +48,13 @@ Example:
 					if findOpt.List {
 						if findOpt.Humanize {
 							for _, r := range buf {
-								log.Msg.Printf("%6s %6s %s", r.ObjectType,
-									SizeString((ByteSize)(r.ObjectSize)), r.ObjectPath)
+								log.Msg.Printf("%6s %6s %s %s", r.ObjectType,
+									SizeString((ByteSize)(r.ObjectSize)), r.InstanceBackupDate, r.ObjectPath)
 							}
 						} else {
 							for _, r := range buf {
-								log.Msg.Printf("%6s %12d %s", r.ObjectType, r.ObjectSize, r.ObjectPath)
+								log.Msg.Printf("%6s %12d %s %s", r.ObjectType, r.ObjectSize, r.InstanceBackupDate,
+									r.ObjectPath)
 							}
 						}
 
@@ -75,11 +77,13 @@ var findOpt = struct {
 
 func init() {
 	rootCmd.AddCommand(findCmd)
-	findCmd.Flags().StringVarP(&findOpt.Opt.Path, "name", "n", "", "search pattern")
+	findCmd.Flags().StringVarP(&findOpt.Opt.Pattern, "name", "n", "", "search pattern")
 	findCmd.Flags().StringVarP(&findOpt.Opt.Type, "type", "t", "",
 		"filter file type (d or f)")
-	findCmd.Flags().BoolVarP(&findOpt.Humanize, "human-readable", "H", false, "search pattern")
+	findCmd.Flags().BoolVarP(&findOpt.Humanize, "human-readable", "H", false,
+		"human-readable sizes")
 	findCmd.Flags().Lookup("human-readable").NoOptDefVal = "true"
-	findCmd.Flags().BoolVarP(&findOpt.List, "list", "l", false, "search pattern")
+	findCmd.Flags().BoolVarP(&findOpt.List, "list", "l", false,
+		"columns with file type and size")
 	findCmd.Flags().Lookup("list").NoOptDefVal = "true"
 }
