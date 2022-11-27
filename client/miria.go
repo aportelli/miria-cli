@@ -61,63 +61,62 @@ func (m *Miria) AuthenticateInteractive() error {
 	return nil
 }
 
-func (m *Miria) Find(path string, pattern string, cout chan []SearchResult, cerr chan error) {
+type FindOptions struct {
+	Path    string
+	Pattern string
+	Type    string
+}
+
+func (m *Miria) Find(opt FindOptions, cout chan []SearchResult, cerr chan error) {
 	// form search request from pattern
 	var req FindInstanceRequest
 
-	req.RootObjectPath = path
+	req.RootObjectPath = opt.Path
 	req.ResultType = "INST"
 	req.PageSize = 3000
 	req.Criteria.Condition = "AND"
-	split := strings.Split(pattern, "*")
-	if pattern == "*" || pattern == "" {
-		// match everything
-		rule := FindRule{
-			Type:     "FILE_NAME",
-			Value:    "",
+	split := strings.Split(opt.Pattern, "*")
+
+	addRule := func(t string, val any, op string) {
+		req.Criteria.Rules = append(req.Criteria.Rules, FindRule{
+			Type:     t,
+			Value:    val,
 			Value2:   nil,
-			Operator: "contains",
-		}
-		req.Criteria.Rules = append(req.Criteria.Rules, rule)
+			Operator: op,
+		})
+	}
+
+	// parsing serach pattern
+	if opt.Pattern == "*" || opt.Pattern == "" {
+		// match everything
+		addRule("FILE_NAME", "", "contains")
 	} else if len(split) == 1 {
 		// no wildcard
-		rule := FindRule{
-			Type:     "FILE_NAME",
-			Value:    split[0],
-			Value2:   nil,
-			Operator: "equal",
-		}
-		req.Criteria.Rules = append(req.Criteria.Rules, rule)
+		addRule("FILE_NAME", split[0], "equal")
 	} else {
 		// first character is not a wildcard
 		if split[0] != "" {
-			rule := FindRule{
-				Type:     "FILE_NAME",
-				Value:    split[0],
-				Value2:   nil,
-				Operator: "starts with",
-			}
-			req.Criteria.Rules = append(req.Criteria.Rules, rule)
+			addRule("FILE_NAME", split[0], "starts with")
 		}
 		// strings between wildcards
 		for _, s := range split[1 : len(split)-1] {
-			rule := FindRule{
-				Type:     "FILE_NAME",
-				Value:    s,
-				Value2:   nil,
-				Operator: "contains",
-			}
-			req.Criteria.Rules = append(req.Criteria.Rules, rule)
+			addRule("FILE_NAME", s, "contains")
 		}
 		// last character is not a wildcard
 		if split[len(split)-1] != "" {
-			rule := FindRule{
-				Type:     "FILE_NAME",
-				Value:    split[len(split)-1],
-				Value2:   nil,
-				Operator: "ends with",
-			}
-			req.Criteria.Rules = append(req.Criteria.Rules, rule)
+			addRule("FILE_NAME", split[len(split)-1], "ends with")
+		}
+	}
+
+	// adding rule for type filtering
+	if opt.Type != "" {
+		if opt.Type == "f" {
+			addRule("FILE_TYPE", 1, "equals to")
+		} else if opt.Type == "d" {
+			addRule("FILE_TYPE", 2, "equals to")
+		} else {
+			cerr <- fmt.Errorf("unknown file type '%s'", opt.Type)
+			return
 		}
 	}
 

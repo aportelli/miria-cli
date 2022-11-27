@@ -36,7 +36,7 @@ type FindInstanceRequest struct {
 
 type FindRule struct {
 	Type     string `json:"type"`
-	Value    string `json:"value"`
+	Value    any    `json:"value"`
 	Value2   any    `json:"value2"`
 	Operator string `json:"operator"`
 }

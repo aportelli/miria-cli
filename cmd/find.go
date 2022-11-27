@@ -30,10 +30,10 @@ Example:
   miria find archive@project:/dir -name '*.txt'`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		pattern := args[0]
+		findOpt.Opt.Path = args[0]
 		cout := make(chan []client.SearchResult)
 		cerr := make(chan error)
-		go miria.Find(pattern, findOpt.Path, cout, cerr)
+		go miria.Find(findOpt.Opt, cout, cerr)
 	out:
 		for {
 			select {
@@ -45,9 +45,17 @@ Example:
 					break out
 				} else {
 					if findOpt.List {
-						for _, r := range buf {
-							log.Msg.Printf("%6s %12d %s", r.ObjectType, r.ObjectSize, r.ObjectPath)
+						if findOpt.Humanize {
+							for _, r := range buf {
+								log.Msg.Printf("%6s %6s %s", r.ObjectType,
+									SizeString((ByteSize)(r.ObjectSize)), r.ObjectPath)
+							}
+						} else {
+							for _, r := range buf {
+								log.Msg.Printf("%6s %12d %s", r.ObjectType, r.ObjectSize, r.ObjectPath)
+							}
 						}
+
 					} else {
 						for _, r := range buf {
 							log.Msg.Println(r.ObjectPath)
@@ -60,13 +68,18 @@ Example:
 }
 
 var findOpt = struct {
-	Path string
-	List bool
-}{"", false}
+	Opt      client.FindOptions
+	List     bool
+	Humanize bool
+}{client.FindOptions{Path: "", Type: "", Pattern: ""}, false, false}
 
 func init() {
 	rootCmd.AddCommand(findCmd)
-	findCmd.Flags().StringVarP(&findOpt.Path, "name", "n", "", "search pattern")
+	findCmd.Flags().StringVarP(&findOpt.Opt.Path, "name", "n", "", "search pattern")
+	findCmd.Flags().StringVarP(&findOpt.Opt.Type, "type", "t", "",
+		"filter file type (d or f)")
+	findCmd.Flags().BoolVarP(&findOpt.Humanize, "human-readable", "H", false, "search pattern")
+	findCmd.Flags().Lookup("human-readable").NoOptDefVal = "true"
 	findCmd.Flags().BoolVarP(&findOpt.List, "list", "l", false, "search pattern")
 	findCmd.Flags().Lookup("list").NoOptDefVal = "true"
 }
