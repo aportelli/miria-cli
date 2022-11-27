@@ -26,6 +26,7 @@ import (
 	"path"
 
 	"github.com/aportelli/miria-cli/log"
+	"github.com/mitchellh/mapstructure"
 )
 
 type restClient struct {
@@ -182,7 +183,7 @@ func (c *restClient) Authenticate(username string, password string) error {
 	if err != nil {
 		return err
 	}
-	err = JsonMapToStruct(&c.auth, auth)
+	err = mapstructure.Decode(auth, &c.auth)
 	if err != nil {
 		return err
 	}
@@ -227,7 +228,7 @@ func (c *restClient) CheckAuthentication() error {
 		if _, ok := response["code"]; ok {
 			return fmt.Errorf("could not refresh token")
 		}
-		err = JsonMapToStruct(&c.auth, response)
+		err = mapstructure.Decode(response, &c.auth)
 		if err != nil {
 			return err
 		}

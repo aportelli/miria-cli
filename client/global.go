@@ -31,15 +31,6 @@ func AppCacheDir() (string, error) {
 	return cacheDir + "/miria", nil
 }
 
-func JsonMapToStruct(pt any, dict map[string]any) error {
-	jbuf, err := json.Marshal(dict)
-	if err != nil {
-		return err
-	}
-	json.Unmarshal(jbuf, pt)
-	return nil
-}
-
 func PrettyPrintResponse(dict map[string]any) {
 	jbuf, _ := json.MarshalIndent(dict, "", "  ")
 	fmt.Println(string(jbuf))
