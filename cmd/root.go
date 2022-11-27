@@ -70,6 +70,7 @@ func init() {
 	userConfigDir, err := os.UserConfigDir()
 	log.ErrorCheck(err, "cannot find user config directory")
 	viper.AddConfigPath(userConfigDir + "/miria")
+	os.MkdirAll(userConfigDir+"/miria", 0750)
 	viper.SafeWriteConfig()
 	err = viper.ReadInConfig()
 	log.ErrorCheck(err, "cannot read user config")

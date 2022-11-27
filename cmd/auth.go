@@ -57,8 +57,20 @@ exit with status 1 in case of failure`,
 	},
 }
 
+var authFileCmd = &cobra.Command{
+	Use:   "file",
+	Short: "Get path of authentication cache",
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		path, err := miria.Client.AuthenticationCache()
+		log.ErrorCheck(err, "cannot get authentication cache path")
+		log.Msg.Println(path)
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(authCmd)
-	authCmd.AddCommand(authResetCmd)
 	authCmd.AddCommand(authCheckCmd)
+	authCmd.AddCommand(authFileCmd)
+	authCmd.AddCommand(authResetCmd)
 }
