@@ -24,7 +24,7 @@ import (
 
 var findCmd = &cobra.Command{
 	Use:   "find <path>",
-	Short: "Find files in archive, ",
+	Short: "Find files in archive",
 	Long: `Find files in the tape archive, mimicking the ` + "`find`" + ` Unix command.
 
 Example:

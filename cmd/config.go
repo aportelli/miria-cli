@@ -26,7 +26,7 @@ import (
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Configure miria-cli",
+	Short: "Configure miria CLI",
 	Long:  `Modify the options for miria-cli. The list of all options can be ob`,
 }
 
