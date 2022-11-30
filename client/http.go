@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/aportelli/miria-cli/log"
@@ -71,11 +70,11 @@ func (m *MiriaClient) executeRequest(request *http.Request, authenticate bool) (
 		return nil, err
 	}
 	defer response.Body.Close()
-	buf, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
+	if response.StatusCode >= 400 {
+		return nil, fmt.Errorf("the Miria server returned HTTP response %d", response.StatusCode)
 	}
-	err = json.Unmarshal(buf, &raw)
+	dec := json.NewDecoder(response.Body)
+	dec.Decode(&raw)
 	if err != nil {
 		return nil, err
 	}
