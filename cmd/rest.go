@@ -36,7 +36,7 @@ var restGetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		path := args[0]
 
-		response, err := miria.Client.Get(path, !restOpt.NoAuth)
+		response, err := miria.Get(path, !restOpt.NoAuth)
 		log.ErrorCheck(err, "")
 		jbuf, err := json.MarshalIndent(response, "", "  ")
 		log.ErrorCheck(err, "")
@@ -56,7 +56,7 @@ var restPostCmd = &cobra.Command{
 
 		err := json.Unmarshal([](byte)(bodyJson), &body)
 		log.ErrorCheck(err, "")
-		response, err := miria.Client.Post(path, body, !restOpt.NoAuth)
+		response, err := miria.Post(path, body, !restOpt.NoAuth)
 		log.ErrorCheck(err, "")
 		jbuf, err := json.MarshalIndent(response, "", "  ")
 		log.ErrorCheck(err, "")
