@@ -106,18 +106,12 @@ func (m *MiriaClient) CheckAuthentication() error {
 
 	// check for token validity and refresh if invalid
 	body := map[string]string{"token": m.auth.Access}
-	response, err := m.Post("/auth/token/verify/", body, false)
+	_, err = m.Post("/auth/token/verify/", body, false)
 	if err != nil {
-		return err
-	}
-	if val, ok := response["code"]; (val == "token_not_valid") && ok {
 		body = map[string]string{"refresh": m.auth.Refresh}
-		response, err = m.Post("/auth/token/refresh/", body, false)
+		response, err := m.Post("/auth/token/refresh/", body, false)
 		if err != nil {
 			return err
-		}
-		if _, ok := response["code"]; ok {
-			return fmt.Errorf("could not refresh token")
 		}
 		err = mapstructure.Decode(response, &m.auth)
 		if err != nil {
