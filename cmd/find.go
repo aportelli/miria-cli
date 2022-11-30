@@ -31,6 +31,7 @@ Example:
   miria find archive@project:/dir --name '*.txt'`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		AuthenticateIfNecessary()
 		findOpt.Opt.Path = args[0]
 		cout := make(chan []client.SearchResult)
 		cerr := make(chan error)

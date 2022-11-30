@@ -34,6 +34,7 @@ will perform a full scan similar to the ` + "`find`" + ` command, and might take
 for large directories.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		AuthenticateIfNecessary()
 		var total uint64 = 0
 		findOpt.Opt.Path = args[0]
 		cout := make(chan []client.SearchResult)
