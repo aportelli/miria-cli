@@ -3,7 +3,7 @@ module github.com/aportelli/miria-cli
 go 1.19
 
 require (
-	github.com/fatih/color v1.13.0
+	github.com/aportelli/golog v0.0.0-20221204114058-94ff30035466
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect

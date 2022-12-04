@@ -17,8 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	log "github.com/aportelli/golog"
 	"github.com/aportelli/miria-cli/client"
-	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 )
 
