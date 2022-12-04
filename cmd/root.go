@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var miria *client.Miria
+var miria *client.MiriaClient
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

@@ -34,11 +34,11 @@ var authResetCmd = &cobra.Command{
 	Long:  `Reset authentication token, you will be asked your user name and password.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		authPath, err := miria.Client.AuthenticationCache()
+		authPath, err := miria.AuthenticationCache()
 		log.ErrorCheck(err, "")
 		err = os.RemoveAll(authPath)
 		log.ErrorCheck(err, "")
-		err = miria.AuthenticateInteractive()
+		err = miria.AuthenticateInteractive(true)
 		log.ErrorCheck(err, "")
 		log.Msg.Println("Authentication token successfully reset")
 	},
@@ -51,7 +51,7 @@ var authCheckCmd = &cobra.Command{
 exit with status 1 in case of failure`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := miria.Client.CheckAuthentication()
+		err := miria.CheckAuthentication()
 		log.ErrorCheck(err, "authentication check failed")
 		log.Msg.Println("Authentication token valid")
 	},
@@ -62,7 +62,7 @@ var authFileCmd = &cobra.Command{
 	Short: "Get path of authentication cache",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		path, err := miria.Client.AuthenticationCache()
+		path, err := miria.AuthenticationCache()
 		log.ErrorCheck(err, "cannot get authentication cache path")
 		log.Msg.Println(path)
 	},

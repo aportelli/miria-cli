@@ -21,45 +21,9 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"syscall"
 
 	"github.com/mitchellh/mapstructure"
-	"golang.org/x/term"
 )
-
-type Miria struct {
-	Client *restClient
-}
-
-/******************************************************************************
- *                      High-level client creation                            *
- ******************************************************************************/
-func NewMiria(host string) *Miria {
-	m := new(Miria)
-	m.Client = NewRestClient(host)
-	return m
-}
-
-func (m *Miria) AuthenticateInteractive() error {
-	err := m.Client.CheckAuthentication()
-	if err != nil {
-		var username string
-
-		fmt.Print("Enter username: ")
-		fmt.Scanln(&username)
-		fmt.Print("Enter password: ")
-		bytepw, err := term.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			return err
-		}
-		fmt.Println("")
-		err = m.Client.Authenticate(username, string(bytepw))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 type FindOptions struct {
 	Path    string
@@ -67,7 +31,8 @@ type FindOptions struct {
 	Type    string
 }
 
-func (m *Miria) Find(opt FindOptions, cout chan []SearchResult, cerr chan error) {
+// Find, meant to be used as a goroutine //////////////////////////////////////
+func (m *MiriaClient) Find(opt FindOptions, cout chan []SearchResult, cerr chan error) {
 	// form search request from pattern
 	var req FindInstanceRequest
 
@@ -122,7 +87,7 @@ func (m *Miria) Find(opt FindOptions, cout chan []SearchResult, cerr chan error)
 
 	// execute request
 	var searchResp SearchResponse
-	resp, err := m.Client.Post("/files/advanced-search/", req, true)
+	resp, err := m.Post("/files/advanced-search/", req, true)
 	if err != nil {
 		cerr <- err
 		return
@@ -132,7 +97,7 @@ func (m *Miria) Find(opt FindOptions, cout chan []SearchResult, cerr chan error)
 	nextPage := resp["nextPage"]
 	for nextPage != nil {
 		nextPageEnc := url.QueryEscape(nextPage.(string))
-		resp, err := m.Client.Post("/files/advanced-search/?page="+nextPageEnc, req, true)
+		resp, err := m.Post("/files/advanced-search/?page="+nextPageEnc, req, true)
 		if err != nil {
 			cerr <- err
 			return

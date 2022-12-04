@@ -24,13 +24,14 @@ import (
 
 var findCmd = &cobra.Command{
 	Use:   "find <path>",
-	Short: "Find files in archive, ",
+	Short: "Find files in archive",
 	Long: `Find files in the tape archive, mimicking the ` + "`find`" + ` Unix command.
 
 Example:
   miria find archive@project:/dir --name '*.txt'`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		AuthenticateIfNecessary()
 		findOpt.Opt.Path = args[0]
 		cout := make(chan []client.SearchResult)
 		cerr := make(chan error)

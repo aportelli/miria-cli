@@ -16,7 +16,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package cmd
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/aportelli/miria-cli/log"
+)
 
 // Pretty print sizes, from Effective Go (https://go.dev/doc/effective_go#constants)
 type ByteSize float64
@@ -53,4 +57,9 @@ func SizeString(b ByteSize) string {
 		return fmt.Sprintf("%.2fkB", b/KB)
 	}
 	return fmt.Sprintf("%.2fB", b)
+}
+
+func AuthenticateIfNecessary() {
+	err := miria.AuthenticateInteractive(false)
+	log.ErrorCheck(err, "cannot authenticate")
 }
