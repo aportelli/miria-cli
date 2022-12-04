@@ -50,7 +50,7 @@ Example:
 						if findOpt.Humanize {
 							for _, r := range buf {
 								log.Msg.Printf("%6s %6s %s %s", r.ObjectType,
-									SizeString((ByteSize)(r.ObjectSize)), r.InstanceBackupDate, r.ObjectPath)
+									log.SizeString((log.ByteSize)(r.ObjectSize)), r.InstanceBackupDate, r.ObjectPath)
 							}
 						} else {
 							for _, r := range buf {

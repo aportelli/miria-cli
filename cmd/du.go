@@ -58,7 +58,7 @@ for large directories.`,
 		}
 		var size string
 		if findOpt.Humanize {
-			size = SizeString(ByteSize(total))
+			size = log.SizeString(log.ByteSize(total))
 		} else {
 			size = fmt.Sprint(total)
 		}

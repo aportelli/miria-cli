@@ -24,7 +24,7 @@ import (
 	"path"
 	"syscall"
 
-	"github.com/aportelli/miria-cli/log"
+	log "github.com/aportelli/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/term"
 )

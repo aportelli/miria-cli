@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/aportelli/miria-cli/log"
+	log "github.com/aportelli/golog"
 )
 
 // Private method to handle abstract requests /////////////////////////////////
