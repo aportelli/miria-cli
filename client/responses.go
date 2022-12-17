@@ -27,18 +27,24 @@ type AuthToken struct {
 type SearchResponse struct {
 	Next         string         `json:"next"`
 	NextPage     string         `json:"nextPage"`
-	Previous     interface{}    `json:"previous"`
-	PreviousPage interface{}    `json:"previousPage"`
+	Previous     any            `json:"previous"`
+	PreviousPage any            `json:"previousPage"`
 	Results      []SearchResult `json:"results"`
 }
 
 type SearchResult struct {
 	InstanceBackupDate string `json:"instanceBackupDate"`
-	InstanceID         int    `json:"instanceId"`
-	ObjectID           int    `json:"objectId"`
+	InstanceId         int    `json:"instanceId"`
+	ObjectId           int    `json:"objectId"`
 	ObjectName         string `json:"objectName"`
 	ObjectPath         string `json:"objectPath"`
 	ObjectSize         uint64 `json:"objectSize"`
 	ObjectType         string `json:"objectType"`
-	RepositoryID       int    `json:"repositoryId"`
+	RepositoryId       int    `json:"repositoryId"`
+}
+
+type ObjectId struct {
+	Id   int    `json:"id"`
+	Name string `json:"name,omitempty"`
+}
 }

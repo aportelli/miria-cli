@@ -70,11 +70,11 @@ func (m *MiriaClient) executeRequest(request *http.Request, authenticate bool) (
 		return nil, err
 	}
 	defer response.Body.Close()
-	if response.StatusCode >= 400 {
-		return nil, fmt.Errorf("the Miria server returned HTTP response %d", response.StatusCode)
-	}
 	dec := json.NewDecoder(response.Body)
-	dec.Decode(&raw)
+	err = dec.Decode(&raw)
+	if response.StatusCode >= 400 {
+		return raw, fmt.Errorf("the Miria server returned HTTP response %d", response.StatusCode)
+	}
 	if err != nil {
 		return nil, err
 	}
