@@ -17,6 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"strings"
+
 	log "github.com/aportelli/golog"
 	"github.com/aportelli/miria-cli/client"
 	"github.com/spf13/cobra"
@@ -35,6 +37,7 @@ Example:
 		findOpt.Opt.Path = args[0]
 		cout := make(chan []client.SearchResult)
 		cerr := make(chan error)
+		rootDepth := depth(findOpt.Opt.Path)
 		go miria.Find(findOpt.Opt, cout, cerr)
 	out:
 		for {
@@ -46,22 +49,19 @@ Example:
 				if buf == nil {
 					break out
 				} else {
-					if findOpt.List {
-						if findOpt.Humanize {
-							for _, r := range buf {
-								log.Msg.Printf("%6s %6s %s %s", r.ObjectType,
-									log.SizeString((log.ByteSize)(r.ObjectSize)), r.InstanceBackupDate, r.ObjectPath)
+					for _, r := range buf {
+						if findOpt.MaxDepth < 0 || depth(r.ObjectPath)-rootDepth <= findOpt.MaxDepth {
+							if findOpt.List {
+								if findOpt.Humanize {
+									log.Msg.Printf("%6s %6s %20s %s", r.ObjectType,
+										log.SizeString((log.ByteSize)(r.ObjectSize)), r.InstanceBackupDate, r.ObjectPath)
+								} else {
+									log.Msg.Printf("%6s %12d %20s %s", r.ObjectType, r.ObjectSize,
+										r.InstanceBackupDate, r.ObjectPath)
+								}
+							} else {
+								log.Msg.Println(r.ObjectPath)
 							}
-						} else {
-							for _, r := range buf {
-								log.Msg.Printf("%6s %12d %s %s", r.ObjectType, r.ObjectSize, r.InstanceBackupDate,
-									r.ObjectPath)
-							}
-						}
-
-					} else {
-						for _, r := range buf {
-							log.Msg.Println(r.ObjectPath)
 						}
 					}
 				}
@@ -74,7 +74,8 @@ var findOpt = struct {
 	Opt      client.FindOptions
 	List     bool
 	Humanize bool
-}{client.FindOptions{Path: "", Type: "", Pattern: ""}, false, false}
+	MaxDepth int
+}{client.FindOptions{Path: "", Type: "", Pattern: ""}, false, false, -1}
 
 func init() {
 	rootCmd.AddCommand(findCmd)
@@ -87,4 +88,21 @@ func init() {
 	findCmd.Flags().BoolVarP(&findOpt.List, "list", "l", false,
 		"columns with file type and size")
 	findCmd.Flags().Lookup("list").NoOptDefVal = "true"
+	findCmd.Flags().IntVarP(&findOpt.MaxDepth, "max-depth", "d", -1, "maximum depth (-1 is unlimited)")
+}
+
+func depth(path string) int {
+	var depth int = 0
+	colSplit := strings.Split(path, ":")
+	slashSplit := strings.Split(colSplit[1], "/")
+	for _, name := range slashSplit {
+		if name != "" {
+			depth++
+		}
+	}
+	if depth == 0 {
+		return depth
+	} else {
+		return depth - 1
+	}
 }

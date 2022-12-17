@@ -78,7 +78,7 @@ func (m *MiriaClient) Find(opt FindOptions, cout chan []SearchResult, cerr chan 
 		if opt.Type == "f" {
 			addRule("FILE_TYPE", 1, "equals to")
 		} else if opt.Type == "d" {
-			addRule("FILE_TYPE", 2, "equals to")
+			addRule("FILE_TYPE", []int{2, 3}, "in")
 		} else {
 			cerr <- fmt.Errorf("unknown file type '%s'", opt.Type)
 			return
