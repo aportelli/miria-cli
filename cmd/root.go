@@ -20,8 +20,8 @@ import (
 	"os"
 	"runtime/pprof"
 
+	log "github.com/aportelli/golog"
 	"github.com/aportelli/miria-cli/client"
-	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

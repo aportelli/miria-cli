@@ -19,7 +19,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/aportelli/miria-cli/log"
+	log "github.com/aportelli/golog"
 	"github.com/spf13/cobra"
 )
 

@@ -19,8 +19,8 @@ package cmd
 import (
 	"fmt"
 
+	log "github.com/aportelli/golog"
 	"github.com/aportelli/miria-cli/client"
-	"github.com/aportelli/miria-cli/log"
 	"github.com/spf13/cobra"
 )
 
@@ -58,7 +58,7 @@ for large directories.`,
 		}
 		var size string
 		if findOpt.Humanize {
-			size = SizeString(ByteSize(total))
+			size = log.SizeString(log.ByteSize(total))
 		} else {
 			size = fmt.Sprint(total)
 		}

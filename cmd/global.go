@@ -17,47 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/aportelli/miria-cli/log"
+	log "github.com/aportelli/golog"
 )
-
-// Pretty print sizes, from Effective Go (https://go.dev/doc/effective_go#constants)
-type ByteSize float64
-
-const (
-	_           = iota // ignore first value by assigning to blank identifier
-	KB ByteSize = 1 << (10 * iota)
-	MB
-	GB
-	TB
-	PB
-	EB
-	ZB
-	YB
-)
-
-func SizeString(b ByteSize) string {
-	switch {
-	case b >= YB:
-		return fmt.Sprintf("%.2fYB", b/YB)
-	case b >= ZB:
-		return fmt.Sprintf("%.2fZB", b/ZB)
-	case b >= EB:
-		return fmt.Sprintf("%.2fEB", b/EB)
-	case b >= PB:
-		return fmt.Sprintf("%.2fPB", b/PB)
-	case b >= TB:
-		return fmt.Sprintf("%.2fTB", b/TB)
-	case b >= GB:
-		return fmt.Sprintf("%.2fGB", b/GB)
-	case b >= MB:
-		return fmt.Sprintf("%.2fMB", b/MB)
-	case b >= KB:
-		return fmt.Sprintf("%.2fkB", b/KB)
-	}
-	return fmt.Sprintf("%.2fB", b)
-}
 
 func AuthenticateIfNecessary() {
 	err := miria.AuthenticateInteractive(false)
